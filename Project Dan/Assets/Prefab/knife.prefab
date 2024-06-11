@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5386302289347379899}
   - component: {fileID: 5533410016100505574}
   - component: {fileID: 4844142292600001746}
+  - component: {fileID: -6467481239689450657}
   m_Layer: 0
   m_Name: knife
   m_TagString: Untagged
@@ -146,3 +147,16 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.42
+--- !u!114 &-6467481239689450657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7326623487904658677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545e5bfc4b591420aa67f28ced867698, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destroyTime: 2

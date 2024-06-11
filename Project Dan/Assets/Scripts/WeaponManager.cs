@@ -30,7 +30,12 @@ public class WeaponManager : MonoBehaviour
 
     public void FireWeapon()
     {
-        weapons[active]?.Fire();
+        if (weapons[active].ammoCount > 0)
+        {
+            weapons[active]?.Fire();
+            weapons[active].ammoCount--;
+        }
+
     }
 
     public void NextWeapon()
