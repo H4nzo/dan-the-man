@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PauseScript : MonoBehaviour
 {
@@ -14,6 +15,11 @@ public class PauseScript : MonoBehaviour
 
     public GameObject canvasHUD;
     public GameObject canvasControls;
+
+    private void Start()
+    {
+        Time.timeScale = 1f;
+    }
 
     public void Pause()
     {
@@ -35,6 +41,16 @@ public class PauseScript : MonoBehaviour
 
     }
 
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void Menu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
     IEnumerator animState(float t, bool state)
     {
         pauseContainer.SetBool(animatorState, state);
@@ -51,13 +67,14 @@ public class PauseScript : MonoBehaviour
 
     private void Update()
     {
-        if(isPaused == true){
+        if (isPaused == true)
+        {
             Time.timeScale = 0f;
-            
+
         }
         else
         {
-             Time.timeScale = 1f;
+            Time.timeScale = 1f;
         }
     }
 }
