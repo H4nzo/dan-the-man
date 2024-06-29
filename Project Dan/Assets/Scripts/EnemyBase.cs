@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class EnemyBase : MonoBehaviour, IDamageable
 {
@@ -21,15 +21,18 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
     [SerializeField][Range(0, 100)] protected int DamageLevel;
 
-
-    bool groundInFront;
     bool running;
     bool alerted;
 
     float timeSinceNotScene;
     protected Transform target;
+
+    [Header("Health")]
+    [SerializeField] Slider HealthSlider;
     void Start()
     {
+        Health = 100;
+
         timeSinceNotScene = 5.5f;
         target = null;
         running = true;
@@ -47,6 +50,14 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (Dead)
+        {
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = 0;
+            rigidBody.rotation = 0;
+            return;
+        }
+
         idleTime -= Time.deltaTime;
 
         patrolZones[0].position = startingPoint + Vector3.right * patrolRadius;
@@ -66,6 +77,9 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
     private void LateUpdate()
     {
+        HealthSlider.value = Health / 100f;
+        HealthSlider.transform.localRotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+
         rigidBody.angularVelocity = 0;
         rigidBody.rotation = 0;
     }
@@ -96,6 +110,12 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
     public bool MoveTo(Transform target)
     {
+        if (!GroundInFront(target))
+        {
+            rigidBody.velocity = Vector3.zero;
+            return true;
+        }
+
         while (idleTime > 0)
         {
             rigidBody.velocity = Vector2.zero;
@@ -147,12 +167,17 @@ public class EnemyBase : MonoBehaviour, IDamageable
         }
     }
 
-    protected bool GroundInFront
+    protected bool GroundInFront(Transform target)
     {
-        get
-        {
-            return false;
-        }
+        Vector3 dir = (target.position - transform.position);
+        dir.y = 0;
+        dir = dir.normalized;
+
+        Debug.DrawRay(transform.position + dir, Vector3.down * 3, Color.red);
+
+        var check = Physics2D.Raycast(transform.position + dir, Vector3.down, 3f);
+
+        return check.transform != null;
     }
 
     int health;
@@ -198,7 +223,13 @@ public class EnemyBase : MonoBehaviour, IDamageable
     public void Die()
     {
         if (Dead) return;
+        
         animator.Play("Death", 0, 0);
+        
+        GetComponent<Collider2D>().enabled = false;
+        HealthSlider.gameObject.SetActive(false);
+        rigidBody.isKinematic = true;
+
         Dead = true;
     }
 }

@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour, IDamageable
 {
     public static PlayerController Instance;
 
+    [SerializeField] HUDManager hudManager;
+
     [SerializeField] float jumpForce;
     [SerializeField] float downForce;
     [SerializeField] float walkSpeed;
@@ -22,6 +24,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     WeaponManager weaponManager;
     InventoryManager inventoryManager;
+    GameOverScreen gameOverScreen;
 
     [SerializeField] Animator slash;
     [SerializeField] GameObject slashObject;
@@ -42,12 +45,14 @@ public class PlayerController : MonoBehaviour, IDamageable
     void Start()
     {
         dead = false;
-        health = 100;
+        health = 50;
 
         animator = GetComponent<Animator>();
         rigidBody = GetComponent<Rigidbody2D>();
         weaponManager = GetComponent<WeaponManager>();
         inventoryManager = GetComponent<InventoryManager>();
+        hudManager = FindObjectOfType<HUDManager>();
+        gameOverScreen = FindObjectOfType<GameOverScreen>();
 
         inputActions = new DanInput();
         inputActions.Enable();
@@ -60,6 +65,12 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (Dead)
+        {
+            rigidBody.velocity = Vector3.zero;
+            return;
+        }
+
         jumpBuffer -= Time.deltaTime;
         jumpBuffer = Mathf.Clamp(jumpBuffer, 0, jumpBuffer);
 
@@ -70,6 +81,11 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         grounded = checkGrounded();
         TryMove();
+
+        if(transform.position.y <= -50)
+        {
+            TakeDamage(100);
+        }
     }
 
     void LateUpdate()
@@ -79,6 +95,8 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         rigidBody.angularVelocity = 0;
         rigidBody.rotation = 0;
+
+        hudManager.HealthSlider.value = Health;
     }
 
     void Jump()
@@ -128,7 +146,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     bool checkGrounded()
     {
-        var check = Physics2D.Raycast(transform.position, Vector3.down, 1.1f);
+        var check = Physics2D.CircleCast(transform.position, 0.5f, Vector3.down, 1.1f);
         return check.transform != null;
     }
 
@@ -154,18 +172,56 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int damage)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (Health <= 0) return;
-
-        Health -= damage;
-        if (Health <= 0) Die();
+        if (collision.transform.root.CompareTag("Platform"))
+        {
+            collision.transform.root.GetComponent<Platform>().Attach(transform);
+        }
     }
 
-    public void Die()
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.transform.root.CompareTag("Platform") && !Dead)
+        {
+            collision.transform.root.GetComponent<Platform>().Dettach(transform);
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (Health <= 0 || Health >= 100) return;
+
+        Health -= damage;
+
+        Handheld.Vibrate();
+        FindObjectOfType<CameraShaker>().ShakeCam(0.15f, 0.35f);
+
+        if (Health <= 0 || Health >= 100) Die(Health >= 100);
+    }
+
+    public void Die(bool vaporise)
     {
         if (Dead) return;
-        animator.Play("Death", 0, 0);
+
+        if (!vaporise)
+        {
+            animator.Play("Death", 0, 0);
+        }
+        else
+        {
+            animator.Play("Vapor", 0, 0);
+        }
+
+        GetComponent<Collider2D>().enabled = false;
+        rigidBody.isKinematic = true;
+        gameOverScreen.EndSequence();
+
         Dead = true;
+    }
+
+    private void OnDrawGizmos()
+    {
+        
     }
 }

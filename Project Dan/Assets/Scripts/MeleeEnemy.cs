@@ -56,7 +56,7 @@ public class MeleeEnemy : EnemyBase
         if (Vector3.Distance(transform.position, target.position) <= 2.3f)
         {
             target.GetComponent<Rigidbody2D>().AddForce((target.position - transform.position).normalized * 20, ForceMode2D.Impulse);
-            target.GetComponent<IDamageable>()?.TakeDamage(DamageLevel);
+            target.GetComponent<IDamageable>()?.TakeDamage(-DamageLevel);
         }
         
         Invoke("stopAttack", 0.7f);
