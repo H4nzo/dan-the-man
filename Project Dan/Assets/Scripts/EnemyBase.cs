@@ -3,8 +3,15 @@ using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum EnemyType
+{
+    MeleeEnemy,
+    RangeEnemy,
+}
 public class EnemyBase : MonoBehaviour, IDamageable
 {
+    public EnemyType enemyType;
+
     protected Rigidbody2D rigidBody;
     protected Animator animator;
 
@@ -46,6 +53,9 @@ public class EnemyBase : MonoBehaviour, IDamageable
 
         startingPoint = transform.position;
         ChooseTarget();
+
+       
+
     }
 
     void Update()
@@ -223,13 +233,18 @@ public class EnemyBase : MonoBehaviour, IDamageable
     public void Die()
     {
         if (Dead) return;
-        
+
         animator.Play("Death", 0, 0);
-        
+
         GetComponent<Collider2D>().enabled = false;
         HealthSlider.gameObject.SetActive(false);
         rigidBody.isKinematic = true;
 
         Dead = true;
+    }
+
+    void OnDeath()
+    {
+        Destroy(gameObject, .5f);
     }
 }

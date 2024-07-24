@@ -22,8 +22,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     Animator animator;
     DanInput inputActions;
 
-    WeaponManager weaponManager;
-    InventoryManager inventoryManager;
+    [HideInInspector] public WeaponManager weaponManager;
+    [HideInInspector] public InventoryManager inventoryManager;
     GameOverScreen gameOverScreen;
 
     [SerializeField] Animator slash;
@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         grounded = checkGrounded();
         TryMove();
 
-        if(transform.position.y <= -50)
+        if (transform.position.y <= -50)
         {
             TakeDamage(100);
         }
@@ -222,6 +222,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void OnDrawGizmos()
     {
-        
+
     }
 }

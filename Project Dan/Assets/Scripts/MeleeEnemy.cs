@@ -5,7 +5,7 @@ public class MeleeEnemy : EnemyBase
 {
     float attackDelay;
     bool attacking;
-
+    
     public override void Patrol()
     {
         base.Patrol();

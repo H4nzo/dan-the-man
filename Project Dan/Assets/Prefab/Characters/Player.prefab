@@ -82,7 +82,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 1227973447, guid: cf2d9722dbd0c9a468b31d02052ac144, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -189,10 +189,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4d18669ab323b944b7485502781668a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hudManager: {fileID: 0}
   jumpForce: 20
   downForce: 0
   walkSpeed: 8
   runSpeed: 0
+  weaponManager: {fileID: 0}
+  inventoryManager: {fileID: 0}
   slash: {fileID: 10949059840660941}
   slashObject: {fileID: 5528303662891636054}
 --- !u!114 &2291835298729485224

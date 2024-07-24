@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     int coins;
+
     [SerializeField] Text coinText;
 
     void Start()
@@ -22,4 +23,11 @@ public class InventoryManager : MonoBehaviour
     {
         coins += coinToAdd;
     }
+
+    public int Coins
+    {
+        get { return coins; }
+        set { coins = value; }
+    }
+
 }

@@ -15,7 +15,8 @@ public class Platform : MonoBehaviour
     [SerializeField] float travelDistance;
     [SerializeField] float waitTime;
 
-    [SerializeField] int width;
+    [SerializeField] float width;
+    [SerializeField] float height;
 
     float waiting;
     bool running;
@@ -93,13 +94,13 @@ public class Platform : MonoBehaviour
             }
             points[0] = transform.position;
             points[1] = points[0] + new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle)) * travelDistance;
-            transform.GetChild(0).localScale = new Vector2(width, 1);
+            transform.GetChild(0).localScale = new Vector2(width, height);
         }
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(points[0], points[1]);
 
-        Gizmos.DrawWireCube(points[0], new Vector3(width, 1));
-        Gizmos.DrawWireCube(points[1], new Vector3(width, 1));
+        Gizmos.DrawWireCube(points[0], new Vector3(width, height));
+        Gizmos.DrawWireCube(points[1], new Vector3(width, height));
     }
 }
