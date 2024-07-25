@@ -3,13 +3,27 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
-    public List<GameObject> enemyPrefabs; // Assign your enemy prefabs in the inspector
+    public string currentLevelName;
+    public List<GameObject> enemyPrefabs;
+
 
     private void Start()
     {
-        if (SaveSystem.HasSave("gameSave"))
+        // if (SaveSystem.HasSave("gameSave"))
+        // {
+        //     LoadGame();
+        // }
+        // Load the level-specific data
+        currentLevelName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        GameData gameData = SaveSystem.LoadGame(currentLevelName);
+
+        if (gameData != null)
         {
             LoadGame();
+        }
+        else
+        {
+            return;
         }
     }
 
@@ -43,13 +57,39 @@ public class GameController : MonoBehaviour
             gameData.playerData = playerData;
         }
 
-        // Save the game and delete previous save if it exists
-        SaveSystem.SaveGame(gameData, "gameSave");
+        // Save used Checkpoints
+        Checkpoint[] Checkpoints = FindObjectsOfType<Checkpoint>();
+        foreach (var checkpoint in Checkpoints)
+        {
+            if (checkpoint.IsTriggered)
+            {
+                CheckpointData checkpointData = new CheckpointData
+                {
+                    position = new float[3] { checkpoint.transform.position.x, checkpoint.transform.position.y, checkpoint.transform.position.z }
+                };
+                gameData.checkpointDatas.Add(checkpointData);
+            }
+        }
+
+        // Save pickups
+        Pickup[] pickups = FindObjectsOfType<Pickup>();
+        foreach (var pickup in pickups)
+        {
+            PickUpData pickUpData = new PickUpData
+            {
+                position = new float[3] { pickup.transform.position.x, pickup.transform.position.y, pickup.transform.position.z },
+                type = pickup.type
+            };
+            gameData.pickupDatas.Add(pickUpData);
+
+            // Save the game and delete previous save if it exists
+            SaveSystem.SaveGame(gameData, currentLevelName);
+        }
     }
 
     public void LoadGame()
     {
-        GameData gameData = SaveSystem.LoadGame("gameSave");
+        GameData gameData = SaveSystem.LoadGame(currentLevelName);
         if (gameData != null)
         {
             // Clear existing enemies
@@ -76,15 +116,61 @@ public class GameController : MonoBehaviour
             {
                 player.transform.position = new Vector3(gameData.playerData.position[0], gameData.playerData.position[1], gameData.playerData.position[2]);
                 player.Health = gameData.playerData.health;
-                Debug.Log("Coins = " + gameData.playerData.coins);
                 player.inventoryManager.AddCoin(gameData.playerData.coins); // Use the public property here
-                // GameObject.FindAnyObjectByType<PlayerController>().inventoryManager.AddCoin(gameData.playerData.coins);
+            }
+
+            // Disable used Checkpoint
+            Checkpoint[] Checkpoints = FindObjectsOfType<Checkpoint>();
+            foreach (var checkpoint in Checkpoints)
+            {
+                foreach (var checkpointData in gameData.checkpointDatas)
+                {
+                    if (Vector3.Distance(checkpoint.transform.position, new Vector3(checkpointData.position[0], checkpointData.position[1], checkpointData.position[2])) < 0.1f)
+                    {
+                        checkpoint.DisableTrigger();
+                    }
+                }
+            }
+
+            // Remove picked up items
+            // Handle pickups
+            Pickup[] pickupsInScene = FindObjectsOfType<Pickup>();
+            List<Pickup> pickupsToKeep = new List<Pickup>();
+
+            foreach (var pickup in pickupsInScene)
+            {
+                bool found = false;
+                foreach (var pickUpData in gameData.pickupDatas)
+                {
+                    if (Vector3.Distance(pickup.transform.position, new Vector3(pickUpData.position[0], pickUpData.position[1], pickUpData.position[2])) < 0.1f &&
+                        pickup.type == pickUpData.type)
+                    {
+                        found = true;
+                        pickupsToKeep.Add(pickup);
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    Destroy(pickup.gameObject);
+                }
+            }
+
+            // Destroy pickups in the scene that are not in the saved data
+            foreach (var pickup in pickupsInScene)
+            {
+                if (!pickupsToKeep.Contains(pickup))
+                {
+                    Destroy(pickup.gameObject);
+                }
             }
         }
     }
 
-    public void ClearSavedData()
-    {
-        SaveSystem.DeleteSave("gameSave");
-    }
+
+public void ClearSavedData()
+{
+    SaveSystem.DeleteSave(currentLevelName);
+}
 }

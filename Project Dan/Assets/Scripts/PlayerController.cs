@@ -203,6 +203,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     public void Die(bool vaporise)
     {
         if (Dead) return;
+        
 
         if (!vaporise)
         {

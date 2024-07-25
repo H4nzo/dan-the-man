@@ -33,7 +33,7 @@ public class GameOverScreen : MonoBehaviour
             rad = Mathf.Lerp(3f, 0f, i / 2);
             yield return null;
         }
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     IEnumerator sequence()
