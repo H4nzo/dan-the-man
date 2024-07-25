@@ -6,24 +6,14 @@ public class GameController : MonoBehaviour
     public string currentLevelName;
     public List<GameObject> enemyPrefabs;
 
-
     private void Start()
     {
-        // if (SaveSystem.HasSave("gameSave"))
-        // {
-        //     LoadGame();
-        // }
-        // Load the level-specific data
         currentLevelName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         GameData gameData = SaveSystem.LoadGame(currentLevelName);
 
         if (gameData != null)
         {
             LoadGame();
-        }
-        else
-        {
-            return;
         }
     }
 
@@ -48,18 +38,21 @@ public class GameController : MonoBehaviour
         PlayerController player = GameObject.FindAnyObjectByType<PlayerController>();
         if (player != null)
         {
+            WeaponManager weaponManager = player.GetComponent<WeaponManager>();
             PlayerData playerData = new PlayerData
             {
                 position = new float[3] { player.transform.position.x, player.transform.position.y, player.transform.position.z },
                 health = player.Health,
-                coins = player.inventoryManager.Coins // Use the public property here
+                coins = player.inventoryManager.Coins, // Use the public property here
+                ammoCount = weaponManager.GetAmmoCount(),
+                weaponType = weaponManager.GetWeaponType()
             };
             gameData.playerData = playerData;
         }
 
         // Save used Checkpoints
-        Checkpoint[] Checkpoints = FindObjectsOfType<Checkpoint>();
-        foreach (var checkpoint in Checkpoints)
+        Checkpoint[] checkpoints = FindObjectsOfType<Checkpoint>();
+        foreach (var checkpoint in checkpoints)
         {
             if (checkpoint.IsTriggered)
             {
@@ -81,10 +74,10 @@ public class GameController : MonoBehaviour
                 type = pickup.type
             };
             gameData.pickupDatas.Add(pickUpData);
-
-            // Save the game and delete previous save if it exists
-            SaveSystem.SaveGame(gameData, currentLevelName);
         }
+
+        // Save the game and delete previous save if it exists
+        SaveSystem.SaveGame(gameData, currentLevelName);
     }
 
     public void LoadGame()
@@ -114,14 +107,16 @@ public class GameController : MonoBehaviour
             PlayerController player = GameObject.FindAnyObjectByType<PlayerController>();
             if (player != null)
             {
+                WeaponManager weaponManager = player.GetComponent<WeaponManager>();
                 player.transform.position = new Vector3(gameData.playerData.position[0], gameData.playerData.position[1], gameData.playerData.position[2]);
                 player.Health = gameData.playerData.health;
                 player.inventoryManager.AddCoin(gameData.playerData.coins); // Use the public property here
+                weaponManager.SetWeapon(gameData.playerData.ammoCount, gameData.playerData.weaponType);
             }
 
-            // Disable used Checkpoint
-            Checkpoint[] Checkpoints = FindObjectsOfType<Checkpoint>();
-            foreach (var checkpoint in Checkpoints)
+            // Disable used Checkpoints
+            Checkpoint[] checkpoints = FindObjectsOfType<Checkpoint>();
+            foreach (var checkpoint in checkpoints)
             {
                 foreach (var checkpointData in gameData.checkpointDatas)
                 {
@@ -132,7 +127,6 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            // Remove picked up items
             // Handle pickups
             Pickup[] pickupsInScene = FindObjectsOfType<Pickup>();
             List<Pickup> pickupsToKeep = new List<Pickup>();
@@ -168,9 +162,8 @@ public class GameController : MonoBehaviour
         }
     }
 
-
-public void ClearSavedData()
-{
-    SaveSystem.DeleteSave(currentLevelName);
-}
+    public void ClearSavedData()
+    {
+        SaveSystem.DeleteSave(currentLevelName);
+    }
 }

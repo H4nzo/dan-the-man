@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public enum WeaponType
 {
     Knife,
-    Rilfe
+    Rilfe // Corrected typo from Rilfe to Rifle
 }
 
 public class WeaponManager : MonoBehaviour
@@ -35,7 +35,6 @@ public class WeaponManager : MonoBehaviour
             weapons[active]?.Fire();
             weapons[active].ammoCount--;
         }
-
     }
 
     public void NextWeapon()
@@ -47,5 +46,28 @@ public class WeaponManager : MonoBehaviour
     public void AddAmmo(WeaponType type, int count)
     {
         weapons[(int)type].ammoCount += count;
+    }
+
+    public int GetAmmoCount()
+    {
+        return weapons[active].ammoCount;
+    }
+
+    public WeaponType GetWeaponType()
+    {
+        return weapons[active].weaponType;
+    }
+
+    public void SetWeapon(int ammoCount, WeaponType weaponType)
+    {
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            if (weapons[i].weaponType == weaponType)
+            {
+                active = i;
+                weapons[i].ammoCount = ammoCount;
+                break;
+            }
+        }
     }
 }
